@@ -1,0 +1,23 @@
+services:
+  api:
+    build: ./api
+    expose:
+      - "8001"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8001/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"       # Windows/VM 브라우저: http://localhost:8080
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/html/index.html:/usr/share/nginx/html/index.html:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
